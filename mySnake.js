@@ -1,5 +1,8 @@
-var List = document.querySelectorAll('td') //в List помещается список всех ячеек из таблицы
-var n = getRandomInt(400) // n  - ранд знач от 0 до 399
+//в List помещается список всех ячеек из таблицы
+var List = document.querySelectorAll('td') 
+
+// n  - ранд знач от 0 до 399
+var n = getRandomInt(400) 
 
 List.item(n).classList.toggle('green') //toggle - вкл/выкл цвета ячейки
 var dir = -1 // направление
