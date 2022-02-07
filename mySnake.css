@@ -1,0 +1,40 @@
+html {
+      font-family: sans-serif;
+    }
+
+    table {
+      border-collapse: collapse;
+      border: 2px solid rgb(200,200,200);
+      letter-spacing: 1px;
+      font-size: 0.8rem;
+    }
+
+    td, th {
+      border: 1px solid rgb(190,190,190);
+      padding: 7px 7px;
+    }
+
+    td {
+      text-align: center;
+    }
+
+    caption {
+      padding: 10px;
+    }
+
+    .pink{
+        background-color: lightpink;
+    }
+    .green{
+        background-color: lightgreen;
+    }
+    .orange{
+        background-color: lightsalmon;
+    }
+    .blue{
+        background-color: lightblue;
+    }
+    .yellow{
+        background-color: yellow;
+    }
+

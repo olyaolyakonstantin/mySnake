@@ -1,6 +1,3 @@
 # mySnake
-hello World!
-my first repository
 
-my furst commit
-
+my first commit from notebook
