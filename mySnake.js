@@ -1,16 +1,16 @@
 
-//в List помещается список всех ячеек из таблицы
-var List
+//в LIST помещается список всех ячеек из таблицы
+var LIST
 
-var dir = -1 // направление
-var step = 19 // шаг
+var DIRECTION  = -1 // направление
+var STEP = 19 // шаг
 
-// n  - ранд знач от 0 до 399
-var n = Math.floor(Math.random() * 400);
+// random_number  - ранд знач от 0 до 399
+var POSITION = Math.floor(Math.random() * 400);
 
 
 var changeStep = function(){
-	step = step == 19 ?
+	STEP = STEP == 19 ?
 		21
 		: 19
 }
@@ -18,28 +18,28 @@ var changeStep = function(){
 
 
 var setup = function(){
-	List = document.querySelectorAll('td') 
+	LIST = document.querySelectorAll('td') 
 
 	//toggle - вкл/выкл цвета ячейки
-	List.item(n).classList.toggle('green') 
+	LIST.item(POSITION).classList.toggle('green') 
 
 	//функция работает с заданным интервалом (тут с 150мс)
 	var beep = setInterval(function(){ 
-		List.item(n).classList.toggle('green')
+		LIST.item(POSITION).classList.toggle('green')
 
-		if((n + step * dir) > 399 
-				|| (n + step * dir) < 0){ 
-			dir *= -1 
+		if((POSITION + STEP * DIRECTION ) > 399 
+				|| (POSITION + STEP * DIRECTION ) < 0){ 
+			DIRECTION  *= -1 
 			changeStep()  
 		}
 
-		if((n+1) % 20 == 0 
-				|| n % 20 == 0){ 
+		if((POSITION+1) % 20 == 0 
+				|| POSITION % 20 == 0){ 
 			changeStep()
 		}
-		n += dir * step
+		POSITION += DIRECTION  * STEP
 
-		List.item(n).classList.toggle('green')
+		LIST.item(POSITION).classList.toggle('green')
 	}, 150)
 
 	//clearInterval(beep)
