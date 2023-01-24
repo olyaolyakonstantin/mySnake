@@ -1,51 +1,89 @@
+var setup = function() {
+    var LIST = document.querySelectorAll('td')
+    var snake = [Math.floor(Math.random() * 400)]
+    var apple = Math.floor(Math.random() * 400)
 
-//в LIST помещается список всех ячеек из таблицы
-var LIST
+    LIST.item(apple).classList.add('orange')
+    LIST.item(snake).classList.add('green')
 
-var DIRECTION  = -1 // направление
-var STEP = 19 // шаг
+    var dir = 'ArrowRight'
 
-// random_number  - ранд знач от 0 до 399
-var POSITION = Math.floor(Math.random() * 400);
+    var isPaused = false;
+    var beep = setInterval(function() { 
+    document.addEventListener('keydown', (event) => {
+        if (event.code == 'Space') {
+            isPaused = isPaused == true ? false : true 
+        }
+
+        //isPaused = event.code == 'Space' ? true 
+        //: false 
 
 
-var changeStep = function(){
-	STEP = STEP == 19 ?
-		21
-		: 19
+        switch (event.code){
+            
+            case 'ArrowRight':
+            if (dir != 'ArrowLeft') dir = 'ArrowRight'
+            break;
+
+            case 'ArrowLeft':
+            if (dir != 'ArrowRight') dir = 'ArrowLeft'
+            break;
+
+            case 'ArrowUp':
+            if (dir != 'ArrowDown') dir = 'ArrowUp'
+            break;
+
+            case 'ArrowDown':
+            if (dir != 'ArrowUp') dir = 'ArrowDown'
+            break; 
+    
+        }
+    }, false);
+
+if (!isPaused){
+        switch (dir) {
+            case 'ArrowRight':
+            snake.unshift(snake[0]+1)
+            if (snake[0]%20==0) snake[0]-=20
+            break;
+
+            case 'ArrowLeft':
+            snake.unshift(snake[0]-1)
+            if ((snake[0]+1)%20==0) snake[0]+=20
+            break;
+
+            case 'ArrowUp':
+            snake.unshift(snake[0]-20)
+            if (snake[0]<0) snake[0]+=400 
+            break;
+
+            case 'ArrowDown':
+            snake.unshift(snake[0]+20)
+            if (snake[0]>400) snake[0]-=400 
+            break;
+
+            default:
+            break;
+        }
+        
+        for (let i of snake) LIST.item(i).classList.add('green')
+        var tail = snake.pop()
+        LIST.item(tail).classList.remove('green')
+
+        
+        for (let i in snake) {
+            if (snake[i] == apple) {
+                if (snake[0] == apple) snake.push(tail)
+                LIST.item(apple).classList.toggle('orange')
+                apple = Math.floor(Math.random() * 400)
+                LIST.item(apple).classList.toggle('orange')
+                
+            }
+        }  
+        
+        for (let i = 1; i < snake.length; i++) {
+            if (snake[0] == snake[i]) clearInterval(beep)
+        }
 }
-
-
-
-var setup = function(){
-	LIST = document.querySelectorAll('td') 
-
-	//toggle - вкл/выкл цвета ячейки
-	LIST.item(POSITION).classList.toggle('green') 
-
-	//функция работает с заданным интервалом (тут с 150мс)
-	var beep = setInterval(function(){ 
-		LIST.item(POSITION).classList.toggle('green')
-
-		if((POSITION + STEP * DIRECTION ) > 399 
-				|| (POSITION + STEP * DIRECTION ) < 0){ 
-			DIRECTION  *= -1 
-			changeStep()  
-		}
-
-		if((POSITION+1) % 20 == 0 
-				|| POSITION % 20 == 0){ 
-			changeStep()
-		}
-		POSITION += DIRECTION  * STEP
-
-		LIST.item(POSITION).classList.toggle('green')
-	}, 150)
-
-	//clearInterval(beep)
-
+    }, 150)
 }
-
-
-
-
