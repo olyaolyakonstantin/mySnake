@@ -10,14 +10,10 @@ var setup = function() {
 
     var isPaused = false;
     var beep = setInterval(function() { 
+        
     document.addEventListener('keydown', (event) => {
-        if (event.code == 'Space') {
-            isPaused = isPaused == true ? false : true 
-        }
 
-        //isPaused = event.code == 'Space' ? true 
-        //: false 
-
+        isPaused = event.code == 'Space' ? true : false 
 
         switch (event.code){
             
