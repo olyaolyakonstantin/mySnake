@@ -1,6 +1,10 @@
 html {
 	font-family: sans-serif;
 }
+#score {
+	padding-left: 200px;
+	 margin:12px
+}
 
 table {
 	border-collapse: collapse;

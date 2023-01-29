@@ -2,6 +2,7 @@ var setup = function() {
     var LIST = document.querySelectorAll('td')
     var snake = [Math.floor(Math.random() * 400)]
     var apple = Math.floor(Math.random() * 400)
+    var score = 0;
 
     LIST.item(apple).classList.add('orange')
     LIST.item(snake).classList.add('green')
@@ -10,7 +11,7 @@ var setup = function() {
 
     var isPaused = false;
     var beep = setInterval(function() { 
-        
+
     document.addEventListener('keydown', (event) => {
 
         isPaused = event.code == 'Space' ? true : false 
@@ -61,14 +62,21 @@ if (!isPaused){
             default:
             break;
         }
-        
-        for (let i of snake) LIST.item(i).classList.add('green')
+
+    
         var tail = snake.pop()
+        for (let i of snake) LIST.item(i).classList.add('green')
         LIST.item(tail).classList.remove('green')
+        
+         for (let i = 1; i < snake.length; i++) {
+            if (snake[0] == snake[i]) clearInterval(beep)
+        }
+
 
         
         for (let i in snake) {
             if (snake[i] == apple) {
+                score += 10
                 if (snake[0] == apple) snake.push(tail)
                 LIST.item(apple).classList.toggle('orange')
                 apple = Math.floor(Math.random() * 400)
@@ -77,9 +85,8 @@ if (!isPaused){
             }
         }  
         
-        for (let i = 1; i < snake.length; i++) {
-            if (snake[0] == snake[i]) clearInterval(beep)
-        }
+        
 }
-    }, 150)
+    document.getElementById('score').innerHTML = 'score: '+ score;
+    }, 90)
 }
