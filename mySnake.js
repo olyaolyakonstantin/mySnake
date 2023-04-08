@@ -41,14 +41,18 @@ var DIRECTIONS = {
 }
 
 var setup = function() {
+
+	var gridSize = 20
 	var LIST = document.querySelectorAll('td')
 
-	var snake = [Math.floor(Math.random() * 400)]
-	var apple = Math.floor(Math.random() * 400)
+	var snake = [Math.floor(Math.random() * gridSize*gridSize)]
+	var apple = Math.floor(Math.random() * gridSize*gridSize)
 	var score = 0
 
 	var gate1 = undefined
 	var gate2 = undefined
+
+	var step = 1
 
 
 	LIST.item(apple).classList.add('orange')
@@ -75,32 +79,51 @@ var setup = function() {
 
 	var gameDraw = function(){
 		if (!isPaused) {
-			switch (direction) {
+
+		/*	switch (direction) {
 				case 'up':
-					snake.unshift(snake[0]-20)
+					snake.unshift(snake[0]-gridSize)
 					if(snake[0] < 0){
-					  	snake[0] += 400
+					  	snake[0] += gridSize*gridSize
 					}
 					break
 				case 'down':
-					snake.unshift(snake[0]+20)
-					if(snake[0] >= 400){
-						snake[0] -= 400
+					snake.unshift(snake[0]+gridSize)
+					if(snake[0] >= gridSize*gridSize){
+						snake[0] -= gridSize*gridSize
 					}
 					break
 				case 'right':
 					snake.unshift(snake[0]+1)
-					if(snake[0]%20 == 0){
-						snake[0] -= 20
+					if(snake[0]%gridSize == 0){
+						snake[0] -= gridSize
 					}
 					break
 				case 'left':
 					snake.unshift(snake[0]-1)
-					if((snake[0]+1)%20 == 0){
-						snake[0] += 20
+					if((snake[0]+1)%gridSize == 0){
+						snake[0] += gridSize
 					}
 					break
-			}
+				} */
+				// step setup
+				step = 1
+				if (direction == 'up' || direction == 'left') {
+					step *= -1
+				}
+				if (direction == 'up' || direction == 'down') {
+					step *= gridSize
+				}
+
+				snake.unshift(snake[0] + step) // left: step == -1
+
+				if (snake[0] < 0 || snake[0] >= gridSize*gridSize) {
+					snake[0] -= step * gridSize
+				}
+				if (direction == 'right' && snake[0] % gridSize == 0
+					|| direction == 'left' && (snake[0]+1) % gridSize == 0) {
+					snake[0] -= step * gridSize
+				}
 
 			// teleports the snake from gate to gate
 			if (snake[0] == gate1 || snake[0] == gate2) {
@@ -114,8 +137,8 @@ var setup = function() {
 				LIST.item(gate1).classList.remove('grey')
 				LIST.item(gate2).classList.remove('grey')
 
-				gate1 = Math.floor(Math.random() * 400)
-				gate2 = Math.floor(Math.random() * 400)
+				gate1 = Math.floor(Math.random() * gridSize*gridSize)
+				gate2 = Math.floor(Math.random() * gridSize*gridSize)
 
 				LIST.item(gate1).classList.add('grey')
 				LIST.item(gate2).classList.add('grey')
@@ -134,21 +157,19 @@ var setup = function() {
 				}
 			}
 
-
-
 			for(var i in snake) {
 				if (snake[i] == apple) {
 					score += 10
 					if (snake[0] == apple) snake.push(tail)
 					LIST.item(apple).classList.toggle('orange')
-					apple = Math.floor(Math.random() * 400)
+					apple = Math.floor(Math.random() * gridSize*gridSize)
 					LIST.item(apple).classList.toggle('orange')
 				}
 			}
 
-			document.getElementById('score').innerHTML = 'score: '+ score
+				document.getElementById('score').innerHTML = 'score: '+ score
 		}
-    }
+  }
 
 	var tick = setInterval(gameDraw, 90)
 }
