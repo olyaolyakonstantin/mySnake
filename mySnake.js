@@ -10,10 +10,34 @@ var print123 = function(prefix){
 			console.log(n) }) }
 
 
-var DIRECTION_KEYS = {
-			ArrowUp: 0,
-	ArrowLeft: 1, ArrowRight: 3,
-			ArrowDown: 2,
+// Keyboard control configuation
+//
+// Format:
+// 	{
+// 		<key-name>: <command>,
+// 		...
+// 	}
+//
+// 	<key-name> as is returned by event.code
+//
+var KEYS = {
+	ArrowUp: 'up',
+	ArrowDown: 'down',
+	ArrowLeft: 'left',
+	ArrowRight: 'right',
+
+	KeyW: 'up',
+	KeyS: 'down',
+	KeyA: 'left',
+	KeyD: 'right',
+
+	Space: 'pause',
+}
+
+var DIRECTIONS = {
+			up: 0,
+	left: 1, right: 3,
+			down: 2,
 }
 
 var setup = function() {
@@ -23,11 +47,6 @@ var setup = function() {
 	var apple = Math.floor(Math.random() * 400)
 	var score = 0
 
-	//gate1 = Math.floor(Math.random() * 400)
-	//gate2 = Math.floor(Math.random() * 400)
-
-	//LIST.item(gate1).classList.add('grey')
-	//LIST.item(gate2).classList.add('grey')
 	var gate1 = undefined
 	var gate2 = undefined
 
@@ -36,19 +55,20 @@ var setup = function() {
 	LIST.item(snake).classList.add('green')
 
 
-	var direction = 'ArrowRight'
+	var direction = 'right'
 
 	var isPaused = false
 
 	document.addEventListener("keydown",
 		function(event) {
+			var key = KEYS[event.code]
 			isPaused =
-				event.code == 'Space' ?
+				key == 'pause' ?
 					true
 					: false
-			if(event.code in DIRECTION_KEYS
-					&& (DIRECTION_KEYS[direction] - DIRECTION_KEYS[event.code])%2 != 0){
-				direction = event.code
+			if(key in DIRECTIONS
+					&& (DIRECTIONS[direction] - DIRECTIONS[key])%2 != 0){
+				direction = key
 			}
 		})
 
@@ -56,51 +76,47 @@ var setup = function() {
 	var gameDraw = function(){
 		if (!isPaused) {
 			switch (direction) {
-				case 'ArrowRight':
-					snake.unshift(snake[0]+1)
-					if(snake[0]%20 == 0){
-						snake[0] -= 20
-					}
-					break
-
-				case 'ArrowLeft':
-					snake.unshift(snake[0]-1)
-					if((snake[0]+1)%20 == 0){
-						snake[0] += 20
-					}
-					break
-
-				case 'ArrowUp':
+				case 'up':
 					snake.unshift(snake[0]-20)
 					if(snake[0] < 0){
 					  	snake[0] += 400
 					}
 					break
-
-				case 'ArrowDown':
+				case 'down':
 					snake.unshift(snake[0]+20)
 					if(snake[0] >= 400){
 						snake[0] -= 400
 					}
 					break
-
-				default:
+				case 'right':
+					snake.unshift(snake[0]+1)
+					if(snake[0]%20 == 0){
+						snake[0] -= 20
+					}
+					break
+				case 'left':
+					snake.unshift(snake[0]-1)
+					if((snake[0]+1)%20 == 0){
+						snake[0] += 20
+					}
 					break
 			}
 
-			// teleporting
+			// teleports the snake from gate to gate
 			if (snake[0] == gate1 || snake[0] == gate2) {
 					snake[0] = snake[0] == gate1 ?
 					 	gate2
-						:gate1
+						: gate1
 			}
 
-			//teleport every
+			// teleports the gates every 30 points
 			if (snake.length%3 == 0 && snake[0] == apple) {
 				LIST.item(gate1).classList.remove('grey')
 				LIST.item(gate2).classList.remove('grey')
+
 				gate1 = Math.floor(Math.random() * 400)
 				gate2 = Math.floor(Math.random() * 400)
+
 				LIST.item(gate1).classList.add('grey')
 				LIST.item(gate2).classList.add('grey')
 			}
