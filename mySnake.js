@@ -10,6 +10,8 @@ var print123 = function(prefix){
 			console.log(n) }) }
 
 
+var SPEED = 90
+
 // Keyboard control configuation
 //
 // Format:
@@ -39,14 +41,18 @@ var DIRECTIONS = {
 	left: 1, right: 3,
 			down: 2,
 }
+var DIRECTIONS_IDX = Object.keys(DIRECTIONS)
 
 var setup = function() {
 
-	var gridSize = 20
 	var LIST = document.querySelectorAll('td')
 
-	var snake = [Math.floor(Math.random() * gridSize*gridSize)]
-	var apple = Math.floor(Math.random() * gridSize*gridSize)
+	var height = document.querySelectorAll('tr').length
+	var cellCount = LIST.length
+	var width = cellCount / height
+
+	var snake = [Math.floor(Math.random() * cellCount)]
+	var apple = Math.floor(Math.random() * cellCount)
 	var score = 0
 
 	var gate1 = undefined
@@ -80,56 +86,66 @@ var setup = function() {
 	var gameDraw = function(){
 		if (!isPaused) {
 
-		/*	switch (direction) {
+			//* XXX movement rewrite...
+			switch (direction) {
 				case 'up':
-					snake.unshift(snake[0]-gridSize)
+					snake.unshift(snake[0]-width)
 					if(snake[0] < 0){
-					  	snake[0] += gridSize*gridSize
+					  	snake[0] += cellCount
 					}
 					break
 				case 'down':
-					snake.unshift(snake[0]+gridSize)
-					if(snake[0] >= gridSize*gridSize){
-						snake[0] -= gridSize*gridSize
+					snake.unshift(snake[0]+width)
+					if(snake[0] >= cellCount){
+						snake[0] -= cellCount
 					}
 					break
 				case 'right':
 					snake.unshift(snake[0]+1)
-					if(snake[0]%gridSize == 0){
-						snake[0] -= gridSize
+					if(snake[0]%width == 0){
+						snake[0] -= width
 					}
 					break
 				case 'left':
 					snake.unshift(snake[0]-1)
-					if((snake[0]+1)%gridSize == 0){
-						snake[0] += gridSize
+					if((snake[0]+1)%width == 0){
+						snake[0] += width
 					}
 					break
-				} */
-				// step setup
-				step = 1
-				if (direction == 'up' || direction == 'left') {
-					step *= -1
-				}
-				if (direction == 'up' || direction == 'down') {
-					step *= gridSize
-				}
+			}
+			/*/
+			// step setup
+			step = 1
+			if (direction == 'up' || direction == 'left') {
+				step *= -1
+			}
+			if (direction == 'up' || direction == 'down') {
+				step *= width
+			}
 
-				snake.unshift(snake[0] + step) // left: step == -1
+			snake.unshift(snake[0] + step) // left: step == -1
 
-				if (snake[0] < 0 || snake[0] >= gridSize*gridSize) {
-					snake[0] -= step * gridSize
-				}
-				if (direction == 'right' && snake[0] % gridSize == 0
-					|| direction == 'left' && (snake[0]+1) % gridSize == 0) {
-					snake[0] -= step * gridSize
-				}
+			// horizontal check...
+			if (snake[0] <= 0
+					|| snake[0] >= cellCount) {
+				snake[0] -= step * height
+			}
+			if ((direction == 'right'
+						&& snake[0] % width == 0)
+					|| (direction == 'left'
+						&& (snake[0]+1) % width == 0)) {
+				snake[0] -= step * width
+			}
+			//*/
 
 			// teleports the snake from gate to gate
 			if (snake[0] == gate1 || snake[0] == gate2) {
 					snake[0] = snake[0] == gate1 ?
 					 	gate2
 						: gate1
+
+					direction = DIRECTIONS_IDX[(DIRECTIONS[direction]+1) % 4]
+
 			}
 
 			// teleports the gates every 30 points
@@ -137,8 +153,8 @@ var setup = function() {
 				LIST.item(gate1).classList.remove('grey')
 				LIST.item(gate2).classList.remove('grey')
 
-				gate1 = Math.floor(Math.random() * gridSize*gridSize)
-				gate2 = Math.floor(Math.random() * gridSize*gridSize)
+				gate1 = Math.floor(Math.random() * cellCount)
+				gate2 = Math.floor(Math.random() * cellCount)
 
 				LIST.item(gate1).classList.add('grey')
 				LIST.item(gate2).classList.add('grey')
@@ -162,7 +178,7 @@ var setup = function() {
 					score += 10
 					if (snake[0] == apple) snake.push(tail)
 					LIST.item(apple).classList.toggle('orange')
-					apple = Math.floor(Math.random() * gridSize*gridSize)
+					apple = Math.floor(Math.random() * cellCount)
 					LIST.item(apple).classList.toggle('orange')
 				}
 			}
@@ -171,5 +187,7 @@ var setup = function() {
 		}
   }
 
-	var tick = setInterval(gameDraw, 90)
+	var tick = setInterval(gameDraw, SPEED)
 }
+
+// vim:set sw=4 ts=4 :
