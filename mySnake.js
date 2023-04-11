@@ -37,11 +37,14 @@ var KEYS = {
 }
 
 var DIRECTIONS = {
-			up: 0,
-	left: 1, right: 3,
-			down: 2,
+	up: 0,
+	left: 1,
+	down: 2,
+	right: 3,
 }
 var DIRECTIONS_IDX = Object.keys(DIRECTIONS)
+
+
 
 var setup = function() {
 
@@ -52,6 +55,7 @@ var setup = function() {
 	var width = cellCount / height
 
 	var snake = [Math.floor(Math.random() * cellCount)]
+
 	var apple = Math.floor(Math.random() * cellCount)
 	var score = 0
 
@@ -64,6 +68,17 @@ var setup = function() {
 	LIST.item(apple).classList.add('orange')
 	LIST.item(snake).classList.add('green')
 
+	var wall = [Math.floor(Math.random() * cellCount)]
+
+
+// Wall setup v.1
+/*
+	for (i=0; i<8; i++){
+		if ((wall[i] + width) < cellCount){
+				wall.push(wall[i] + width)
+		}
+	}
+*/
 
 	var direction = 'right'
 
@@ -86,7 +101,43 @@ var setup = function() {
 	var gameDraw = function(){
 		if (!isPaused) {
 
-			//* XXX movement rewrite...
+			//* XXX Q: which implementation is better?
+			// XXX pros and cons:
+			// 		+ better editablity
+			// 			no logic du[plication
+			// 		- worse readabilit
+			// size of step...
+			var step = (direction == 'up'
+					|| direction == 'down') ?
+				width
+				: 1
+			// direction of step...
+			var d = (direction == 'up'
+					|| direction == 'left') ?
+				-1
+				: 1
+			// move the snake...
+			snake.unshift(snake[0] + step*d)
+			// overflow: vertcal
+			if(snake[0] < 0
+					|| snake[0] >= cellCount){
+				snake[0] += cellCount * -d
+			// overflow: horizontal...
+			} else if((direction == 'left'
+						&& (snake[0]+1)%width == 0)
+					|| (direction == 'right'
+						&& snake[0]%width == 0)){
+				snake[0] += width * -d
+			}
+
+
+
+			/*/
+			// XXX pros and cons:
+			// 		+ better readability
+			// 			simpler structure
+			// 		- worse editability
+			// 			logic duplication in two differenet ways
 			switch (direction) {
 				case 'up':
 					snake.unshift(snake[0]-width)
@@ -100,52 +151,29 @@ var setup = function() {
 						snake[0] -= cellCount
 					}
 					break
-				case 'right':
-					snake.unshift(snake[0]+1)
-					if(snake[0]%width == 0){
-						snake[0] -= width
-					}
-					break
 				case 'left':
 					snake.unshift(snake[0]-1)
 					if((snake[0]+1)%width == 0){
 						snake[0] += width
 					}
 					break
-			}
-			/*/
-			// step setup
-			step = 1
-			if (direction == 'up' || direction == 'left') {
-				step *= -1
-			}
-			if (direction == 'up' || direction == 'down') {
-				step *= width
-			}
-
-			snake.unshift(snake[0] + step) // left: step == -1
-
-			// horizontal check...
-			if (snake[0] <= 0
-					|| snake[0] >= cellCount) {
-				snake[0] -= step * height
-			}
-			if ((direction == 'right'
-						&& snake[0] % width == 0)
-					|| (direction == 'left'
-						&& (snake[0]+1) % width == 0)) {
-				snake[0] -= step * width
+				case 'right':
+					snake.unshift(snake[0]+1)
+					if(snake[0]%width == 0){
+						snake[0] -= width
+					}
+					break
 			}
 			//*/
 
+
+			/*
 			// teleports the snake from gate to gate
 			if (snake[0] == gate1 || snake[0] == gate2) {
 					snake[0] = snake[0] == gate1 ?
 					 	gate2
 						: gate1
-
 					direction = DIRECTIONS_IDX[(DIRECTIONS[direction]+1) % 4]
-
 			}
 
 			// teleports the gates every 30 points
@@ -159,16 +187,33 @@ var setup = function() {
 				LIST.item(gate1).classList.add('grey')
 				LIST.item(gate2).classList.add('grey')
 			}
+			*/
+
+			/*
+			// snake against the wall
+			for (var i in wall) {
+				if (snake[0] == wall[i]) {
+					clearInterval(tick)
+				}
+			}
+			*/
 
 			var tail = snake.pop()
 
+			//green color in snake
 			for(let i of snake){
 				LIST.item(i).classList.add('green')
 			}
 			LIST.item(tail).classList.remove('green')
 
+			// grey color in wall
+			for (var i in wall) {
+				LIST.item(wall[i]).classList.add('grey')
+			}
+
+
 			for(let i = 1; i < snake.length; i++) {
-				if (snake[0] == snake[i]){
+				if (snake[0] == snake[i]) {
 					clearInterval(tick)
 				}
 			}
@@ -176,14 +221,31 @@ var setup = function() {
 			for(var i in snake) {
 				if (snake[i] == apple) {
 					score += 10
-					if (snake[0] == apple) snake.push(tail)
+					if (snake[0] == apple) {
+						snake.push(tail)
+
+						// grow the wall
+						wall.unshift(wall[0] + step*d)
+						// overflow: vertcal
+						if(wall[0] < 0
+								|| wall[0] >= cellCount){
+							wall[0] += cellCount * -d
+						// overflow: horizontal...
+						} else if((direction == 'left'
+									&& (wall[0]+1)%width == 0)
+								|| (direction == 'right'
+									&& wall[0]%width == 0)){
+							wall[0] += width * -d
+						}
+
+					}
 					LIST.item(apple).classList.toggle('orange')
 					apple = Math.floor(Math.random() * cellCount)
 					LIST.item(apple).classList.toggle('orange')
 				}
 			}
 
-				document.getElementById('score').innerHTML = 'score: '+ score
+			document.getElementById('score').innerHTML = 'score: '+ score
 		}
   }
 
