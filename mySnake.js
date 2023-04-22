@@ -131,7 +131,6 @@ var setup = function() {
 			}
 
 
-
 			/*/
 			// XXX pros and cons:
 			// 		+ better readability
@@ -225,7 +224,16 @@ var setup = function() {
 						snake.push(tail)
 
 						// grow the wall
-						wall.unshift(wall[0] + step*d)
+
+
+						//	if
+						if (LIST.item(wall[0] + step*d).classList.contains('grey')) {
+							//LIST.item(0).classList.add('pink')
+							wall.unshift(Math.random() * cellCount)
+						} else {
+								wall.unshift(wall[0] + step*d)
+						}
+
 						// overflow: vertcal
 						if(wall[0] < 0
 								|| wall[0] >= cellCount){
@@ -241,7 +249,14 @@ var setup = function() {
 					}
 					LIST.item(apple).classList.toggle('orange')
 					apple = Math.floor(Math.random() * cellCount)
-					LIST.item(apple).classList.toggle('orange')
+
+					// if
+					if (wall.includes(apple)) {
+						apple = Math.floor(Math.random() * cellCount)
+					} else {
+							LIST.item(apple).classList.toggle('orange')
+					}
+
 				}
 			}
 
