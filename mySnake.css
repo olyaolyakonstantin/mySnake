@@ -13,7 +13,8 @@ table {
 	font-size: 0.8rem;
 }
 
-td, th {
+td, 
+th {
 	border: 1px solid rgb(190,190,190);
 	padding: 7px 7px;
 }
@@ -26,21 +27,13 @@ caption {
 	padding: 10px;
 }
 
-.pink{
-	background-color: lightpink;
-}
-.green{
+.snake-green {
 	background-color: lightgreen;
 }
-.orange{
+.apple {
 	background-color: lightsalmon;
 }
-.blue{
-	background-color: lightblue;
+.wall {
+	background-color: gray;
 }
-.yellow{
-	background-color: yellow;
-}
-.grey{
-	background-color: grey;
-}
+

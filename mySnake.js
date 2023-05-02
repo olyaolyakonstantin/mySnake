@@ -1,5 +1,7 @@
 
 var print123 = function(prefix){
+	// "??" checks if the first operand is null or undefined, if no 
+	// returns it else returns the second operand...
 	prefix = prefix
 		?? '-> '
 	// this is one of two cases where we need ";" in JS:
@@ -45,18 +47,52 @@ var DIRECTIONS = {
 var DIRECTIONS_IDX = Object.keys(DIRECTIONS)
 
 
-
 var setup = function() {
 
-	var LIST = document.querySelectorAll('td')
+	var field = {
+		cells: document.querySelectorAll('td'),
 
-	var height = document.querySelectorAll('tr').length
-	var cellCount = LIST.length
-	var width = cellCount / height
+		height: undefined,
+		width: undefined,
 
-	var snake = [Math.floor(Math.random() * cellCount)]
+		cellCount: undefined,
 
-	var apple = Math.floor(Math.random() * cellCount)
+		colorCell: function(i, cls){
+			if(this.cells[i].classList.length > 0){
+				return undefined
+			}
+			this.cells[i].classList.add(cls)
+			return  this
+		},
+		colorRandomCell: function(cls){
+			// XXX naive way -- fix this...
+			var tries = 10
+			do {
+				var i = Math.floor(Math.random() * this.cellCount)
+			} while(this.colorCell(i, cls) == null 
+				&& --tries > 0)
+			return i
+		},
+	}
+	// XXX use props for these attributes...
+	field.height = document.querySelectorAll('tr').length
+	field.cellCount = field.cells.length
+	field.width = field.cellCount / field.height
+
+
+	var dfl_snake_color = 'snake-green'
+	var snake = {
+		color: dfl_snake_color,
+		cells: [field.colorRandomCell(dfl_snake_color)],
+		direction: ['up', 'down', 'left', 'right'][Math.floor(Math.random()*4)],
+	}
+
+	// place apple...
+	field.colorRandomCell('apple')
+
+	// wall...
+	field.colorRandomCell('wall')
+
 	var score = 0
 
 	var gate1 = undefined
@@ -65,22 +101,17 @@ var setup = function() {
 	var step = 1
 
 
-	LIST.item(apple).classList.add('orange')
-	LIST.item(snake).classList.add('green')
 
-	var wall = [Math.floor(Math.random() * cellCount)]
 
 
 // Wall setup v.1
 /*
 	for (i=0; i<8; i++){
-		if ((wall[i] + width) < cellCount){
-				wall.push(wall[i] + width)
+		if ((wall[i] + field.width) < field.cellCount){
+				wall.push(wall[i] + field.width)
 		}
 	}
 */
-
-	var direction = 'right'
 
 	var isPaused = false
 
@@ -92,14 +123,35 @@ var setup = function() {
 					true
 					: false
 			if(key in DIRECTIONS
-					&& (DIRECTIONS[direction] - DIRECTIONS[key])%2 != 0){
-				direction = key
+					&& (DIRECTIONS[snake.direction] - DIRECTIONS[key])%2 != 0){
+				snake.direction = key
 			}
 		})
 
 
-	var gameDraw = function(){
+	var action_queue_pre = []
+	var action_queue_post = []
+	var game = {
+		field: field,
+		snake: snake,
+	}
+	var gameStep = function(){
 		if (!isPaused) {
+			for(var action of action_queue_pre){
+				action.call(game)
+			}
+			for(var action of action_queue_post){
+				action.call(game)
+			}
+		}
+	}
+
+	// snake...
+	action_queue_pre
+		.push(function(){
+			var snake = this.snake
+			var cells = snake.cells
+			var field = this.field
 
 			//* XXX Q: which implementation is better?
 			// XXX pros and cons:
@@ -107,65 +159,74 @@ var setup = function() {
 			// 			no logic du[plication
 			// 		- worse readabilit
 			// size of step...
-			var step = (direction == 'up'
-					|| direction == 'down') ?
-				width
+			var step = (snake.direction == 'up'
+					|| snake.direction == 'down') ?
+				field.width
 				: 1
 			// direction of step...
-			var d = (direction == 'up'
-					|| direction == 'left') ?
+			var d = (snake.direction == 'up'
+					|| snake.direction == 'left') ?
 				-1
 				: 1
 			// move the snake...
-			snake.unshift(snake[0] + step*d)
+			cells.unshift(cells[0] + step*d)
 			// overflow: vertcal
-			if(snake[0] < 0
-					|| snake[0] >= cellCount){
-				snake[0] += cellCount * -d
+			if(cells[0] < 0
+					|| cells[0] >= field.cellCount){
+				cells[0] += field.cellCount * -d
 			// overflow: horizontal...
-			} else if((direction == 'left'
-						&& (snake[0]+1)%width == 0)
-					|| (direction == 'right'
-						&& snake[0]%width == 0)){
-				snake[0] += width * -d
+			} else if((snake.direction == 'left'
+						&& (cells[0]+1)%field.width == 0)
+					|| (snake.direction == 'right'
+						&& cells[0]%field.width == 0)){
+				cells[0] += field.width * -d
 			}
+			snake.tail = cells.pop()
+		})
+	action_queue_post
+		.push(function(){
+			var field = this.field
+			var snake = this.snake
+			var cells = snake.cells
+			var tail = snake.tail
 
-
-			/*/
-			// XXX pros and cons:
-			// 		+ better readability
-			// 			simpler structure
-			// 		- worse editability
-			// 			logic duplication in two differenet ways
-			switch (direction) {
-				case 'up':
-					snake.unshift(snake[0]-width)
-					if(snake[0] < 0){
-					  	snake[0] += cellCount
-					}
-					break
-				case 'down':
-					snake.unshift(snake[0]+width)
-					if(snake[0] >= cellCount){
-						snake[0] -= cellCount
-					}
-					break
-				case 'left':
-					snake.unshift(snake[0]-1)
-					if((snake[0]+1)%width == 0){
-						snake[0] += width
-					}
-					break
-				case 'right':
-					snake.unshift(snake[0]+1)
-					if(snake[0]%width == 0){
-						snake[0] -= width
-					}
-					break
+			// snake...
+			for(let i of cells){
+				field.colorCell(i, snake.color)
 			}
-			//*/
+			field.cells.item(tail).classList.remove(snake.color)
+
+			// snake self-collision...
+			for(let i = 1; i < cells.length; i++) {
+				if (cells[0] == cells[i]) {
+					clearInterval(tick)
+				}
+			}
+		})
 
 
+	// apple...
+	action_queue_pre
+		.push(function(){
+			var head = this.snake.cells[0]
+			if (this.field.cells[head].classList.contains('apple')) {
+				this.snake.cells.push(this.snake.tail)
+
+				this.field.cells.item(head).classList.remove('apple')
+				this.field.colorRandomCell('apple')
+			}
+		})
+
+	// wall...
+	action_queue_pre
+		.push(function(){
+			var head = this.snake.cells[0]
+			// snake hits wall...
+			if (this.field.cells[head].classList.contains('wall')){
+				clearInterval(tick)
+			}
+		})
+	
 			/*
 			// teleports the snake from gate to gate
 			if (snake[0] == gate1 || snake[0] == gate2) {
@@ -177,14 +238,14 @@ var setup = function() {
 
 			// teleports the gates every 30 points
 			if (snake.length%3 == 0 && snake[0] == apple) {
-				LIST.item(gate1).classList.remove('grey')
-				LIST.item(gate2).classList.remove('grey')
+				field.cells.item(gate1).classList.remove('grey')
+				field.cells.item(gate2).classList.remove('grey')
 
-				gate1 = Math.floor(Math.random() * cellCount)
-				gate2 = Math.floor(Math.random() * cellCount)
+				gate1 = Math.floor(Math.random() * field.cellCount)
+				gate2 = Math.floor(Math.random() * field.cellCount)
 
-				LIST.item(gate1).classList.add('grey')
-				LIST.item(gate2).classList.add('grey')
+				field.cells.item(gate1).classList.add('grey')
+				field.cells.item(gate2).classList.add('grey')
 			}
 			*/
 
@@ -197,26 +258,7 @@ var setup = function() {
 			}
 			*/
 
-			var tail = snake.pop()
-
-			//green color in snake
-			for(let i of snake){
-				LIST.item(i).classList.add('green')
-			}
-			LIST.item(tail).classList.remove('green')
-
-			// grey color in wall
-			for (var i in wall) {
-				LIST.item(wall[i]).classList.add('grey')
-			}
-
-
-			for(let i = 1; i < snake.length; i++) {
-				if (snake[0] == snake[i]) {
-					clearInterval(tick)
-				}
-			}
-
+/*
 			for(var i in snake) {
 				if (snake[i] == apple) {
 					score += 10
@@ -227,34 +269,34 @@ var setup = function() {
 
 
 						//	if
-						if (LIST.item(wall[0] + step*d).classList.contains('grey')) {
-							//LIST.item(0).classList.add('pink')
-							wall.unshift(Math.random() * cellCount)
+						if (field.cells.item(wall[0] + step*d).classList.contains('grey')) {
+							//field.cells.item(0).classList.add('pink')
+							wall.unshift(Math.random() * field.cellCount)
 						} else {
 								wall.unshift(wall[0] + step*d)
 						}
 
 						// overflow: vertcal
 						if(wall[0] < 0
-								|| wall[0] >= cellCount){
-							wall[0] += cellCount * -d
+								|| wall[0] >= field.cellCount){
+							wall[0] += field.cellCount * -d
 						// overflow: horizontal...
 						} else if((direction == 'left'
-									&& (wall[0]+1)%width == 0)
+									&& (wall[0]+1)%field.width == 0)
 								|| (direction == 'right'
-									&& wall[0]%width == 0)){
-							wall[0] += width * -d
+									&& wall[0]%field.width == 0)){
+							wall[0] += field.width * -d
 						}
 
 					}
-					LIST.item(apple).classList.toggle('orange')
-					apple = Math.floor(Math.random() * cellCount)
+					field.cells.item(apple).classList.toggle('apple')
+					apple = Math.floor(Math.random() * field.cellCount)
 
 					// if
 					if (wall.includes(apple)) {
-						apple = Math.floor(Math.random() * cellCount)
+						apple = Math.floor(Math.random() * field.cellCount)
 					} else {
-							LIST.item(apple).classList.toggle('orange')
+							field.cells.item(apple).classList.toggle('apple')
 					}
 
 				}
@@ -262,9 +304,10 @@ var setup = function() {
 
 			document.getElementById('score').innerHTML = 'score: '+ score
 		}
-  }
+	}
+//*/
 
-	var tick = setInterval(gameDraw, SPEED)
+	var tick = setInterval(gameStep, SPEED)
 }
 
 // vim:set sw=4 ts=4 :
