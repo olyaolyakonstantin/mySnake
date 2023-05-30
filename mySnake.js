@@ -31,7 +31,7 @@ var DIRECTIONS = {
 	right: 3,
 }
 
-var DIRECTIONS_IDX = Object.keys(DIRECTIONS)
+
 
 var snake = {
 	body: undefined ,
@@ -199,4 +199,3 @@ var setup = function() {
 	var tick = setInterval(gameDraw, SPEED)
 }
 
-// vim:set sw=4 ts=4 :
